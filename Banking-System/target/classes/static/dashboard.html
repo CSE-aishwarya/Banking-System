@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureBank - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4ff;
+        }
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            position: fixed;
+            background: linear-gradient(180deg, #1a237e, #283593);
+            color: white;
+            padding: 25px 15px;
+        }
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .sidebar p {
+            font-size: 12px;
+            text-align: center;
+            color: #9fa8da;
+            margin-bottom: 30px;
+        }
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 6px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+        .logout-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 15px;
+            right: 15px;
+            padding: 12px;
+            background: #c62828;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .admin-btn {
+            position: absolute;
+            bottom: 70px;
+            left: 15px;
+            right: 15px;
+            padding: 12px;
+            background: #b71c1c;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+        }
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+        .header { margin-bottom: 25px; }
+        .header h1 { color: #1a237e; font-size: 24px; }
+        .header p { color: #666; font-size: 14px; }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+        .card .icon { font-size: 28px; margin-bottom: 8px; }
+        .card h3 {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .card .value {
+            color: #1a237e;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+        .panel h2 {
+            color: #1a237e;
+            font-size: 17px;
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #555;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1a237e;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .btn {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .btn-primary { background: #1a237e; color: white; }
+        .btn-success { background: #2e7d32; color: white; }
+        .btn-danger  { background: #c62828; color: white; }
+        .btn:hover { opacity: 0.9; }
+        .result-msg {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .result-ok  { background: #e8f5e9; color: #2e7d32; }
+        .result-err { background: #ffebee; color: #c62828; }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #f5f7ff;
+            padding: 11px;
+            text-align: left;
+            font-size: 13px;
+            color: #555;
+        }
+        td {
+            padding: 11px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+    /* Hide sidebar on mobile */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar h2 {
+        font-size: 16px;
+        margin-bottom: 0;
+        flex: 1;
+    }
+
+    .sidebar > p {
+        display: none;
+    }
+
+    /* Mobile Nav */
+    .nav-item {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-bottom: 0;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.15);
+    }
+
+    .admin-btn {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 20px;
+    }
+
+    .logout-btn {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 20px;
+        width: auto;
+    }
+
+    /* Main content */
+    .main {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    /* Cards grid */
+    .cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .card .value {
+        font-size: 18px;
+    }
+
+    /* Form rows */
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tables scroll */
+    .panel {
+        overflow-x: auto;
+        padding: 15px;
+    }
+
+    table {
+        min-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar h2 {
+        font-size: 14px;
+    }
+
+    .nav-item {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+}
+    </style>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+</script>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>🏦 SecureBank</h2>
+    <p id="sidebarName">Welcome!</p>
+
+    <div class="nav-item active"
+         onclick="showSection('dashboard', this)">
+        📊 Dashboard
+    </div>
+    <div class="nav-item"
+         onclick="showSection('createAccount', this)">
+        🏦 Create Account
+    </div>
+    <div class="nav-item"
+         onclick="showSection('deposit', this)">
+        💰 Deposit
+    </div>
+    <div class="nav-item"
+         onclick="showSection('withdraw', this)">
+        💸 Withdraw
+    </div>
+    <div class="nav-item"
+         onclick="showSection('transfer', this)">
+        🔄 Transfer
+    </div>
+    <div class="nav-item"
+         onclick="showSection('transactions', this)">
+        📋 Transactions
+    </div>
+    <div class="nav-item"
+         onclick="showSection('loans', this)">
+        🏠 Loans
+    </div>
+    <div class="nav-item"
+     onclick="showSection('profile', this)">
+    👤 My Profile
+    </div>
+
+    <button class="admin-btn"
+            id="adminBtn"
+            onclick="goToAdmin()">
+        ⚙️ Admin Panel
+    </button>
+
+    <button class="logout-btn" onclick="logout()">
+        🚪 Logout
+    </button>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+    <div class="header">
+        <h1 id="welcomeMsg">Welcome!</h1>
+        <p id="emailDisplay"></p>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard" class="section active">
+        <div class="cards">
+            <div class="card">
+                <div class="icon">👤</div>
+                <h3>Account Holder</h3>
+                <div class="value" id="holderName">-</div>
+            </div>
+            <div class="card">
+                <div class="icon">📧</div>
+                <h3>Email</h3>
+                <div class="value"
+                     style="font-size:15px"
+                     id="holderEmail">-</div>
+            </div>
+            <div class="card">
+                <div class="icon">🎭</div>
+                <h3>Role</h3>
+                <div class="value" id="holderRole">-</div>
+            </div>
+        </div>
+        <div class="panel">
+            <h2>📂 My Accounts</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account Number</th>
+                        <th>Type</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsTable">
+                    <tr>
+                        <td colspan="4"
+                            style="text-align:center">
+                            Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create Account -->
+    <div id="createAccount" class="section">
+        <div class="panel">
+            <h2>🏦 Create New Account</h2>
+            <div class="form-group">
+                <label>Account Type</label>
+                <select id="accountType">
+                    <option value="SAVINGS">
+                        Savings Account
+                    </option>
+                    <option value="CURRENT">
+                        Current Account
+                    </option>
+                    <option value="FIXED">
+                        Fixed Deposit
+                    </option>
+                </select>
+            </div>
+            <button class="btn btn-primary"
+                    onclick="createAccount()">
+                Create Account
+            </button>
+            <div id="createMsg"></div>
+        </div>
+    </div>
+
+    <!-- Deposit -->
+    <div id="deposit" class="section">
+        <div class="panel">
+            <h2>💰 Deposit Money</h2>
+            <div class="form-group">
+                <label>Select Account</label>
+                <select id="depositAcc">
+                    <option value="">
+                        -- Select Account --
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="depositAmt"
+                       placeholder="Enter amount">
+            </div>
+            <button class="btn btn-success"
+                    onclick="doDeposit()">
+                Deposit Now
+            </button>
+            <div id="depositMsg"></div>
+        </div>
+    </div>
+
+    <!-- Withdraw -->
+    <div id="withdraw" class="section">
+        <div class="panel">
+            <h2>💸 Withdraw Money</h2>
+            <div class="form-group">
+                <label>Select Account</label>
+                <select id="withdrawAcc">
+                    <option value="">
+                        -- Select Account --
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="withdrawAmt"
+                       placeholder="Enter amount">
+            </div>
+            <button class="btn btn-danger"
+                    onclick="doWithdraw()">
+                Withdraw Now
+            </button>
+            <div id="withdrawMsg"></div>
+        </div>
+    </div>
+
+    <!-- Transfer -->
+    <div id="transfer" class="section">
+        <div class="panel">
+            <h2>🔄 Fund Transfer</h2>
+            <div class="form-group">
+                <label>From Account (Your Account)</label>
+                <select id="fromAcc">
+                    <option value="">
+                        -- Select Your Account --
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>To Account Number (Any Account)</label>
+                <input type="text" id="toAcc"
+                       placeholder="Enter any account number">
+            </div>
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="transferAmt"
+                       placeholder="Enter amount">
+            </div>
+            <div style="background:#e3f2fd;padding:12px;
+                border-radius:8px;margin-bottom:15px;
+                font-size:13px;color:#1565c0">
+                ℹ️ You can transfer to
+                <b>any account number</b>
+                in the system.
+            </div>
+            <button class="btn btn-primary"
+                    onclick="doTransfer()">
+                Transfer Now
+            </button>
+            <div id="transferMsg"></div>
+        </div>
+    </div>
+
+   <!-- Transactions -->
+<div id="transactions" class="section">
+    <div class="panel">
+        <h2>📋 Transaction History</h2>
+
+        <!-- Download Button -->
+        <button class="btn btn-primary"
+                style="margin-bottom:15px;
+                padding:10px 20px;
+                font-size:13px"
+                onclick="downloadStatement()">
+            📄 Download PDF Statement
+        </button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="transactionTable">
+                <tr>
+                    <td colspan="5"
+                        style="text-align:center">
+                        Loading...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Message Div -->
+        <div id="transMsg"></div>
+
+    </div>
+</div>
+
+    <!-- Loans -->
+<div id="loans" class="section">
+    <div class="panel">
+        <h2>🏠 Apply for Loan</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Loan Type</label>
+                <select id="loanType">
+                    <option value="HOME">Home Loan</option>
+                    <option value="CAR">Car Loan</option>
+                    <option value="PERSONAL">Personal Loan</option>
+                    <option value="EDUCATION">Education Loan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="loanAmount"
+                       placeholder="Enter amount"
+                       oninput="calculateEMI()">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Tenure (Months)</label>
+            <input type="number" id="loanTenure"
+                   placeholder="e.g. 12, 24, 60"
+                   oninput="calculateEMI()">
+        </div>
+
+        <!-- EMI Calculator Result -->
+        <div id="emiResult" style="display:none;
+            background:#e3f2fd;
+            border-radius:12px;
+            padding:20px;
+            margin-bottom:20px">
+            <h3 style="color:#1a237e;
+                margin-bottom:15px;
+                font-size:16px">
+                📊 EMI Calculation
+            </h3>
+            <div style="display:grid;
+                grid-template-columns:1fr 1fr 1fr;
+                gap:15px">
+                <div style="background:white;
+                    padding:15px;
+                    border-radius:10px;
+                    text-align:center;
+                    box-shadow:0 2px 8px
+                    rgba(0,0,0,0.08)">
+                    <div style="font-size:12px;
+                        color:#666;
+                        margin-bottom:5px">
+                        Monthly EMI
+                    </div>
+                    <div id="emiAmount"
+                         style="font-size:22px;
+                         font-weight:700;
+                         color:#1a237e">
+                        ₹0
+                    </div>
+                </div>
+                <div style="background:white;
+                    padding:15px;
+                    border-radius:10px;
+                    text-align:center;
+                    box-shadow:0 2px 8px
+                    rgba(0,0,0,0.08)">
+                    <div style="font-size:12px;
+                        color:#666;
+                        margin-bottom:5px">
+                        Total Interest
+                    </div>
+                    <div id="totalInterest"
+                         style="font-size:22px;
+                         font-weight:700;
+                         color:#c62828">
+                        ₹0
+                    </div>
+                </div>
+                <div style="background:white;
+                    padding:15px;
+                    border-radius:10px;
+                    text-align:center;
+                    box-shadow:0 2px 8px
+                    rgba(0,0,0,0.08)">
+                    <div style="font-size:12px;
+                        color:#666;
+                        margin-bottom:5px">
+                        Total Payment
+                    </div>
+                    <div id="totalPayment"
+                         style="font-size:22px;
+                         font-weight:700;
+                         color:#2e7d32">
+                        ₹0
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interest Rate Info -->
+            <div style="margin-top:12px;
+                font-size:12px;
+                color:#555;
+                text-align:center">
+                Interest Rate: 8.5% per annum
+            </div>
+
+            <!-- Payment Breakdown Bar -->
+            <div style="margin-top:15px">
+                <div style="display:flex;
+                    justify-content:space-between;
+                    font-size:12px;
+                    color:#555;
+                    margin-bottom:5px">
+                    <span>Principal</span>
+                    <span>Interest</span>
+                </div>
+                <div style="height:10px;
+                    border-radius:5px;
+                    background:#e0e0e0;
+                    overflow:hidden">
+                    <div id="principalBar"
+                         style="height:100%;
+                         background:#1a237e;
+                         border-radius:5px;
+                         transition:width 0.5s">
+                    </div>
+                </div>
+                <div style="display:flex;
+                    justify-content:space-between;
+                    font-size:11px;
+                    color:#888;
+                    margin-top:4px">
+                    <span id="principalPct">0%</span>
+                    <span id="interestPct">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary"
+                onclick="applyLoan()">
+            Apply Now
+        </button>
+        <div id="loanMsg"></div>
+    </div>
+
+    <!-- My Loans -->
+    <div class="panel">
+        <h2>📋 My Loan Applications</h2>
+        <button class="btn btn-primary"
+                style="margin-bottom:15px;
+                padding:8px 16px;font-size:13px"
+                onclick="loadMyLoans()">
+            🔄 Refresh Loans
+        </button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>EMI</th>
+                    <th>Tenure</th>
+                    <th>Interest</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="myLoansTable">
+                <tr>
+                    <td colspan="6"
+                        style="text-align:center;
+                        color:#666">
+                        Click Refresh to load loans
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Profile -->
+<div id="profile" class="section">
+
+    <!-- Profile Info Card -->
+    <div class="panel">
+        <h2>👤 My Profile</h2>
+        <div style="display:grid;
+            grid-template-columns:200px 1fr;
+            gap:30px;align-items:start">
+
+           <!-- Avatar -->
+<div style="text-align:center">
+    <div id="avatarContainer"
+         style="width:120px;height:120px;
+         border-radius:50%;
+         background:linear-gradient(
+             135deg,#1a237e,#1565c0);
+         display:flex;
+         align-items:center;
+         justify-content:center;
+         margin:0 auto 15px;
+         overflow:hidden;
+         border:4px solid #e8eaf6;
+         box-shadow:0 4px 15px rgba(0,0,0,0.15)">
+        <img id="profilePhoto"
+             src=""
+             alt="Profile"
+             style="width:100%;height:100%;
+             object-fit:cover;
+             display:none">
+        <span id="avatarIcon"
+              style="font-size:48px">👤</span>
+    </div>
+
+    <div id="profileName"
+         style="font-size:18px;
+         font-weight:700;
+         color:#1a237e">
+        Loading...
+    </div>
+    <div id="profileRole"
+         style="font-size:13px;
+         color:#888;margin-top:4px">
+    </div>
+    <div id="profileMember"
+         style="font-size:12px;
+         color:#aaa;margin-top:4px">
+    </div>
+
+    <!-- Upload Photo Button -->
+    <div style="margin-top:15px">
+        <label for="photoInput"
+               style="display:inline-block;
+               padding:8px 16px;
+               background:#1a237e;
+               color:white;
+               border-radius:8px;
+               cursor:pointer;
+               font-size:13px;
+               font-weight:600">
+            📸 Change Photo
+        </label>
+        <input type="file"
+               id="photoInput"
+               accept="image/*"
+               style="display:none"
+               onchange="uploadPhoto(this)">
+    </div>
+    <div id="photoMsg"
+         style="font-size:12px;
+         margin-top:8px;
+         text-align:center">
+    </div>
+</div>
+
+            <!-- Info -->
+            <div>
+                <div style="display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:15px;margin-bottom:20px">
+                    <div style="background:#f5f7ff;
+                        padding:15px;
+                        border-radius:10px">
+                        <div style="font-size:12px;
+                            color:#888;
+                            margin-bottom:4px">
+                            Full Name
+                        </div>
+                        <div id="infoName"
+                             style="font-weight:600;
+                             color:#333">-</div>
+                    </div>
+                    <div style="background:#f5f7ff;
+                        padding:15px;
+                        border-radius:10px">
+                        <div style="font-size:12px;
+                            color:#888;
+                            margin-bottom:4px">
+                            Email
+                        </div>
+                        <div id="infoEmail"
+                             style="font-weight:600;
+                             color:#333">-</div>
+                    </div>
+                    <div style="background:#f5f7ff;
+                        padding:15px;
+                        border-radius:10px">
+                        <div style="font-size:12px;
+                            color:#888;
+                            margin-bottom:4px">
+                            Phone
+                        </div>
+                        <div id="infoPhone"
+                             style="font-weight:600;
+                             color:#333">-</div>
+                    </div>
+                    <div style="background:#f5f7ff;
+                        padding:15px;
+                        border-radius:10px">
+                        <div style="font-size:12px;
+                            color:#888;
+                            margin-bottom:4px">
+                            Address
+                        </div>
+                        <div id="infoAddress"
+                             style="font-weight:600;
+                             color:#333">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile -->
+    <div class="panel">
+        <h2>✏️ Edit Profile</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text"
+                       id="editName"
+                       placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text"
+                       id="editPhone"
+                       placeholder="Enter phone">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Address</label>
+            <input type="text"
+                   id="editAddress"
+                   placeholder="Enter address">
+        </div>
+        <button class="btn btn-primary"
+                onclick="updateProfile()">
+            💾 Save Changes
+        </button>
+        <div id="profileMsg"></div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="panel">
+        <h2>🔐 Change Password</h2>
+        <div class="form-group">
+            <label>Current Password</label>
+            <input type="password"
+                   id="currentPass"
+                   placeholder="Enter current password">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password"
+                       id="newPassProfile"
+                       placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password"
+                       id="confirmPassProfile"
+                       placeholder="Confirm password">
+            </div>
+        </div>
+        <button class="btn btn-primary"
+                onclick="changePassword()">
+            🔐 Change Password
+        </button>
+        <div id="passMsg"></div>
+    </div>
+
+</div>
+</div><!-- end main -->
+
+<script>
+// =====================
+// 1. CHECK LOGIN FIRST
+// =====================
+const token = localStorage.getItem('token');
+if (!token) {
+    window.location.href = 'index.html';
+}
+
+// =====================
+// 2. LOAD USER DATA
+// =====================
+const fullName = localStorage.getItem('fullName') || '';
+const email    = localStorage.getItem('email') || '';
+const role     = localStorage.getItem('role') || '';
+
+// Set user info on page
+document.getElementById('welcomeMsg').textContent =
+    'Welcome, ' + (fullName || 'User') + '!';
+document.getElementById('emailDisplay').textContent =
+    email;
+document.getElementById('sidebarName').textContent =
+    fullName || 'User';
+document.getElementById('holderName').textContent =
+    fullName || '-';
+document.getElementById('holderEmail').textContent =
+    email || '-';
+document.getElementById('holderRole').textContent =
+    role || '-';
+
+// =====================
+// 3. SHOW ADMIN BUTTON
+// =====================
+if (role === 'ADMIN') {
+    document.getElementById('adminBtn').style.display
+        = 'block';
+}
+
+// =====================
+// 4. LOAD ACCOUNTS
+// =====================
+loadAccounts();
+
+// =====================
+// 5. FUNCTIONS
+// =====================
+function authHeader() {
+    return {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+}
+
+function goToAdmin() {
+    window.location.href = 'admin.html';
+}
+
+function showSection(id, el) {
+    document.querySelectorAll('.section')
+        .forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item')
+        .forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (el) el.classList.add('active');
+    if (id === 'transactions') loadTransactions();
+    if (id === 'dashboard' ||
+        id === 'deposit'   ||
+        id === 'withdraw'  ||
+        id === 'transfer') {
+        loadAccounts();
+    }
+    if(id === 'profile') loadProfile();
+}
+
+function showMsg(id, text, isOk) {
+    const el = document.getElementById(id);
+    el.className = 'result-msg ' +
+        (isOk ? 'result-ok' : 'result-err');
+    el.textContent = text;
+}
+
+async function loadAccounts() {
+    try {
+        const res = await fetch(
+            '/api/accounts/my-accounts', {
+            headers: authHeader()
+        });
+        const data = await res.json();
+
+        const tbody =
+            document.getElementById('accountsTable');
+        const dSel =
+            document.getElementById('depositAcc');
+        const wSel =
+            document.getElementById('withdrawAcc');
+        const fSel =
+            document.getElementById('fromAcc');
+
+        dSel.innerHTML =
+            '<option value="">-- Select Account --</option>';
+        wSel.innerHTML =
+            '<option value="">-- Select Account --</option>';
+        fSel.innerHTML =
+            '<option value="">-- Select Account --</option>';
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="4" ' +
+                'style="text-align:center;color:#666">' +
+                '⚠️ No accounts. Create one!</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(acc => `
+        <tr>
+            <td>
+                <b>${acc.accountNumber}</b>
+                <br>
+                <button onclick="showQR(
+                    '${acc.accountNumber}')"
+                    style="margin-top:5px;
+                    padding:3px 8px;
+                    background:#e8eaf6;
+                    color:#1a237e;
+                    border:none;
+                    border-radius:4px;
+                    cursor:pointer;
+                    font-size:11px;
+                    font-weight:600">
+                    📱 QR Code
+                </button>
+            </td>
+            <td>${acc.accountType}</td>
+            <td style="color:#2e7d32;
+                font-weight:600">
+                ₹${acc.balance.toLocaleString()}
+            </td>
+            <td>
+                <span class="badge badge-success">
+                    ${acc.status}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+
+        data.forEach(acc => {
+            const opt = '<option value="' +
+                acc.accountNumber + '">' +
+                acc.accountNumber +
+                ' (₹' + acc.balance.toLocaleString() +
+                ')</option>';
+            dSel.innerHTML += opt;
+            wSel.innerHTML += opt;
+            fSel.innerHTML += opt;
+        });
+
+    } catch (err) {
+        console.error('loadAccounts error:', err);
+    }
+}
+
+async function createAccount() {
+    const type =
+        document.getElementById('accountType').value;
+    try {
+        const res = await fetch(
+            '/api/accounts/create?accountType=' + type, {
+            method: 'POST',
+            headers: authHeader()
+        });
+        if (res.ok) {
+            showMsg('createMsg',
+                '✅ Account created successfully!', true);
+            loadAccounts();
+        } else {
+            showMsg('createMsg',
+                '❌ Failed to create account!', false);
+        }
+    } catch (err) {
+        showMsg('createMsg', '❌ Server error!', false);
+    }
+}
+
+async function doDeposit() {
+    const acc =
+        document.getElementById('depositAcc').value;
+    const amt =
+        document.getElementById('depositAmt').value;
+    if (!acc) {
+        showMsg('depositMsg',
+            '❌ Please select account!', false);
+        return;
+    }
+    if (!amt || amt <= 0) {
+        showMsg('depositMsg',
+            '❌ Enter valid amount!', false);
+        return;
+    }
+    try {
+        const res = await fetch(
+            '/api/accounts/deposit?accountNumber=' +
+            acc + '&amount=' + amt, {
+            method: 'POST',
+            headers: authHeader()
+        });
+        if (res.ok) {
+            showMsg('depositMsg',
+                '✅ ₹' + amt + ' Deposited!', true);
+            document.getElementById('depositAmt').value = '';
+            loadAccounts();
+        } else {
+            const e = await res.text();
+            showMsg('depositMsg', '❌ ' + e, false);
+        }
+    } catch (err) {
+        showMsg('depositMsg', '❌ Server error!', false);
+    }
+}
+
+async function doWithdraw() {
+    const acc =
+        document.getElementById('withdrawAcc').value;
+    const amt =
+        document.getElementById('withdrawAmt').value;
+    if (!acc) {
+        showMsg('withdrawMsg',
+            '❌ Please select account!', false);
+        return;
+    }
+    if (!amt || amt <= 0) {
+        showMsg('withdrawMsg',
+            '❌ Enter valid amount!', false);
+        return;
+    }
+    try {
+        const res = await fetch(
+            '/api/accounts/withdraw?accountNumber=' +
+            acc + '&amount=' + amt, {
+            method: 'POST',
+            headers: authHeader()
+        });
+        if (res.ok) {
+            showMsg('withdrawMsg',
+                '✅ ₹' + amt + ' Withdrawn!', true);
+            document.getElementById('withdrawAmt').value = '';
+            loadAccounts();
+        } else {
+            const e = await res.text();
+            showMsg('withdrawMsg', '❌ ' + e, false);
+        }
+    } catch (err) {
+        showMsg('withdrawMsg', '❌ Server error!', false);
+    }
+}
+
+async function doTransfer() {
+    const from =
+        document.getElementById('fromAcc').value;
+    const to =
+        document.getElementById('toAcc').value.trim();
+    const amt =
+        document.getElementById('transferAmt').value;
+    if (!from) {
+        showMsg('transferMsg',
+            '❌ Please select your account!', false);
+        return;
+    }
+    if (!to) {
+        showMsg('transferMsg',
+            '❌ Enter recipient account number!', false);
+        return;
+    }
+    if (from === to) {
+        showMsg('transferMsg',
+            '❌ Cannot transfer to same account!', false);
+        return;
+    }
+    if (!amt || amt <= 0) {
+        showMsg('transferMsg',
+            '❌ Enter valid amount!', false);
+        return;
+    }
+    if (!confirm('Transfer ₹' + amt +
+        ' to ' + to + '?')) return;
+    try {
+        const res = await fetch(
+            '/api/accounts/transfer', {
+            method: 'POST',
+            headers: authHeader(),
+            body: JSON.stringify({
+                fromAccount: from,
+                toAccount: to,
+                amount: amt
+            })
+        });
+        if (res.ok) {
+            showMsg('transferMsg',
+                '✅ ₹' + amt +
+                ' transferred to ' + to + '!', true);
+            document.getElementById('toAcc').value = '';
+            document.getElementById('transferAmt').value = '';
+            loadAccounts();
+        } else {
+            const e = await res.text();
+            showMsg('transferMsg', '❌ ' + e, false);
+        }
+    } catch (err) {
+        showMsg('transferMsg',
+            '❌ Server error!', false);
+    }
+}
+
+async function loadTransactions() {
+    try {
+        const res = await fetch('/api/transactions', {
+            headers: authHeader()
+        });
+        const data = await res.json();
+        const tbody =
+            document.getElementById('transactionTable');
+        if (!data || data.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="5" ' +
+                'style="text-align:center">' +
+                'No transactions yet!</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(tx => `
+            <tr>
+                <td>${tx.transactionId.slice(0,8)}...</td>
+                <td>${tx.transactionType}</td>
+                <td>₹${tx.amount.toLocaleString()}</td>
+                <td>${tx.description || '-'}</td>
+                <td>
+                    <span class="badge badge-success">
+                        ${tx.status}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('loadTransactions error:', err);
+    }
+}
+
+async function applyLoan() {
+    const body = {
+        loanType:
+            document.getElementById('loanType').value,
+        amount:
+            document.getElementById('loanAmount').value,
+        tenureMonths:
+            document.getElementById('loanTenure').value
+    };
+    if (!body.amount || body.amount <= 0) {
+        showMsg('loanMsg',
+            '❌ Enter valid amount!', false);
+        return;
+    }
+    if (!body.tenureMonths || body.tenureMonths <= 0) {
+        showMsg('loanMsg',
+            '❌ Enter valid tenure!', false);
+        return;
+    }
+    try {
+        const res = await fetch('/api/loans/apply', {
+            method: 'POST',
+            headers: authHeader(),
+            body: JSON.stringify(body)
+        });
+        if (res.ok) {
+            showMsg('loanMsg',
+                '✅ Loan application submitted!', true);
+            document.getElementById('loanAmount').value = '';
+            document.getElementById('loanTenure').value = '';
+        } else {
+            showMsg('loanMsg',
+                '❌ Application failed!', false);
+        }
+    } catch (err) {
+        showMsg('loanMsg', '❌ Server error!', false);
+    }
+}
+
+//EMI Calculator
+function calculateEMI() {
+    const principal = parseFloat(
+        document.getElementById('loanAmount').value);
+    const months = parseInt(
+        document.getElementById('loanTenure').value);
+
+    if (!principal || !months ||
+        principal <= 0 || months <= 0) {
+        document.getElementById('emiResult')
+            .style.display = 'none';
+        return;
+    }
+
+    // Interest rate 8.5% per annum
+    const annualRate = 8.5;
+    const monthlyRate = annualRate / 12 / 100;
+
+    // EMI Formula
+    const emi = principal * monthlyRate *
+        Math.pow(1 + monthlyRate, months) /
+        (Math.pow(1 + monthlyRate, months) - 1);
+
+    const totalPayment = emi * months;
+    const totalInterest = totalPayment - principal;
+    const principalPct = Math.round(
+        (principal / totalPayment) * 100);
+    const interestPct = 100 - principalPct;
+
+    // Update display
+    document.getElementById('emiAmount')
+        .textContent = '₹' +
+        Math.round(emi).toLocaleString();
+    document.getElementById('totalInterest')
+        .textContent = '₹' +
+        Math.round(totalInterest).toLocaleString();
+    document.getElementById('totalPayment')
+        .textContent = '₹' +
+        Math.round(totalPayment).toLocaleString();
+    document.getElementById('principalBar')
+        .style.width = principalPct + '%';
+    document.getElementById('principalPct')
+        .textContent = principalPct + '%';
+    document.getElementById('interestPct')
+        .textContent = interestPct + '%';
+
+    document.getElementById('emiResult')
+        .style.display = 'block';
+}
+
+// Load My Loans
+async function loadMyLoans() {
+    try {
+        const res = await fetch('/api/loans/my-loans', {
+            headers: authHeader()
+        });
+        const data = await res.json();
+        const tbody =
+            document.getElementById('myLoansTable');
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="6" ' +
+                'style="text-align:center;color:#666">' +
+                'No loan applications yet!</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(loan => {
+            // Calculate EMI for each loan
+            const monthlyRate = 8.5 / 12 / 100;
+            const n = loan.tenureMonths;
+            const p = loan.amount;
+            const emi = p * monthlyRate *
+                Math.pow(1 + monthlyRate, n) /
+                (Math.pow(1 + monthlyRate, n) - 1);
+
+            const statusColors = {
+                'PENDING': '#f57f17',
+                'APPROVED': '#2e7d32',
+                'REJECTED': '#c62828',
+                'CLOSED': '#1565c0'
+            };
+            const color =
+                statusColors[loan.status] || '#666';
+
+            return `
+                <tr>
+                    <td>${loan.loanType}</td>
+                    <td>₹${Number(loan.amount)
+                        .toLocaleString()}</td>
+                    <td style="color:#1a237e;
+                        font-weight:600">
+                        ₹${Math.round(emi)
+                        .toLocaleString()}/mo
+                    </td>
+                    <td>${loan.tenureMonths} months</td>
+                    <td>${loan.interestRate}%</td>
+                    <td>
+                        <span style="
+                            padding:3px 10px;
+                            border-radius:20px;
+                            font-size:12px;
+                            font-weight:600;
+                            background:${color}22;
+                            color:${color}">
+                            ${loan.status}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Load loans error:', err);
+    }
+}
+
+//Load Profile
+async function loadProfile() {
+    try {
+        const res = await fetch('/api/profile', {
+            headers: authHeader()
+        });
+        const data = await res.json();
+
+        // Update avatar/photo
+        if (data.hasPhoto && data.photoUrl) {
+            document.getElementById('profilePhoto')
+                .src = data.photoUrl + '?t=' +
+                new Date().getTime();
+            document.getElementById('profilePhoto')
+                .style.display = 'block';
+            document.getElementById('avatarIcon')
+                .style.display = 'none';
+        } else {
+            document.getElementById('profilePhoto')
+                .style.display = 'none';
+            document.getElementById('avatarIcon')
+                .style.display = 'block';
+        }
+
+        // Update profile display
+        document.getElementById('profileName')
+            .textContent = data.fullName || '-';
+        document.getElementById('profileRole')
+            .textContent = '🎭 ' + (data.role || '-');
+        document.getElementById('profileMember')
+            .textContent = 'Member since: ' +
+            (data.createdAt ?
+                new Date(data.createdAt)
+                .toLocaleDateString() : '-');
+
+        document.getElementById('infoName')
+            .textContent = data.fullName || '-';
+        document.getElementById('infoEmail')
+            .textContent = data.email || '-';
+        document.getElementById('infoPhone')
+            .textContent = data.phone || 'Not set';
+        document.getElementById('infoAddress')
+            .textContent = data.address || 'Not set';
+
+        // Fill edit form
+        document.getElementById('editName')
+            .value = data.fullName || '';
+        document.getElementById('editPhone')
+            .value = data.phone || '';
+        document.getElementById('editAddress')
+            .value = data.address || '';
+
+    } catch (err) {
+        console.error('Profile error:', err);
+    }
+}
+
+// Upload Profile Photo
+async function uploadPhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('profilePhoto')
+            .src = e.target.result;
+        document.getElementById('profilePhoto')
+            .style.display = 'block';
+        document.getElementById('avatarIcon')
+            .style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    try {
+        document.getElementById('photoMsg')
+            .textContent = '⏳ Uploading...';
+        document.getElementById('photoMsg')
+            .style.color = '#1a237e';
+
+        const res = await fetch(
+            '/api/profile/upload-photo', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            body: formData
+        });
+
+        if (res.ok) {
+            document.getElementById('photoMsg')
+                .textContent =
+                '✅ Photo uploaded!';
+            document.getElementById('photoMsg')
+                .style.color = '#2e7d32';
+        } else {
+            const err = await res.text();
+            document.getElementById('photoMsg')
+                .textContent = '❌ ' + err;
+            document.getElementById('photoMsg')
+                .style.color = '#c62828';
+        }
+    } catch (err) {
+        document.getElementById('photoMsg')
+            .textContent = '❌ Upload failed!';
+        document.getElementById('photoMsg')
+            .style.color = '#c62828';
+    }
+}
+// Update Profile
+async function updateProfile() {
+    const body = {
+        fullName: document.getElementById('editName')
+            .value,
+        phone: document.getElementById('editPhone')
+            .value,
+        address: document.getElementById('editAddress')
+            .value
+    };
+
+    if (!body.fullName) {
+        showMsg('profileMsg',
+            '❌ Name cannot be empty!', false);
+        return;
+    }
+
+    try {
+        const res = await fetch(
+            '/api/profile/update', {
+            method: 'PUT',
+            headers: authHeader(),
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+            showMsg('profileMsg',
+                '✅ Profile updated successfully!',
+                true);
+            // Update localStorage name
+            localStorage.setItem(
+                'fullName', body.fullName);
+            document.getElementById('welcomeMsg')
+                .textContent =
+                'Welcome, ' + body.fullName + '!';
+            document.getElementById('sidebarName')
+                .textContent = body.fullName;
+            loadProfile();
+        } else {
+            const e = await res.text();
+            showMsg('profileMsg', '❌ ' + e, false);
+        }
+    } catch (err) {
+        showMsg('profileMsg',
+            '❌ Server error!', false);
+    }
+}
+
+// Change Password
+async function changePassword() {
+    const currentPassword =
+        document.getElementById('currentPass').value;
+    const newPassword =
+        document.getElementById('newPassProfile').value;
+    const confirmPassword =
+        document.getElementById('confirmPassProfile')
+        .value;
+
+    if (!currentPassword || !newPassword ||
+            !confirmPassword) {
+        showMsg('passMsg',
+            '❌ Please fill all fields!', false);
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        showMsg('passMsg',
+            '❌ Password min 6 characters!', false);
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showMsg('passMsg',
+            '❌ Passwords do not match!', false);
+        return;
+    }
+
+    try {
+        const res = await fetch(
+            '/api/profile/change-password', {
+            method: 'PUT',
+            headers: authHeader(),
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+                confirmPassword
+            })
+        });
+
+        if (res.ok) {
+            showMsg('passMsg',
+                '✅ Password changed successfully!',
+                true);
+            document.getElementById('currentPass')
+                .value = '';
+            document.getElementById('newPassProfile')
+                .value = '';
+            document.getElementById('confirmPassProfile')
+                .value = '';
+        } else {
+            const e = await res.text();
+            showMsg('passMsg', '❌ ' + e, false);
+        }
+    } catch (err) {
+        showMsg('passMsg',
+            '❌ Server error!', false);
+    }
+}
+
+//Download PDF Statement
+async function downloadStatement() {
+    try {
+        showMsg('transMsg',
+            '⏳ Generating PDF...', true);
+
+        const res = await fetch(
+            '/api/statement/download', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (res.ok) {
+            // Create download link
+            const blob = await res.blob();
+            const url = window.URL
+                .createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download =
+                'SecureBank_Statement.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } else {
+            alert('❌ Failed to generate statement!');
+        }
+    } catch (err) {
+        alert('❌ Error downloading statement!');
+    }
+}
+
+//QR Code Functions
+function showQR(accountNumber) {
+    // Clear previous QR
+    document.getElementById('qrCodeDiv')
+        .innerHTML = '';
+
+    document.getElementById('qrAccountNum')
+        .textContent = accountNumber;
+
+    // Generate QR Code
+    new QRCode(
+        document.getElementById('qrCodeDiv'), {
+        text: accountNumber,
+        width: 200,
+        height: 200,
+        colorDark: '#1a237e',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Show modal
+    const modal =
+        document.getElementById('qrModal');
+    modal.style.display = 'flex';
+}
+
+function closeQR() {
+    document.getElementById('qrModal')
+        .style.display = 'none';
+    document.getElementById('qrCodeDiv')
+        .innerHTML = '';
+}
+
+// Close QR on background click
+document.getElementById('qrModal')
+    .addEventListener('click', function(e) {
+    if (e.target === this) closeQR();
+});
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'index.html';
+}
+</script>
+
+<!-- QR Code Modal -->
+<div id="qrModal" style="display:none;
+    position:fixed;top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.7);
+    z-index:9999;
+    align-items:center;
+    justify-content:center">
+    <div style="background:white;
+        border-radius:16px;
+        padding:30px;
+        text-align:center;
+        max-width:320px;
+        width:90%;
+        margin:20px">
+        <h3 style="color:#1a237e;
+            margin-bottom:5px">
+            📱 Account QR Code
+        </h3>
+        <p id="qrAccountNum"
+           style="color:#666;
+           font-size:13px;
+           margin-bottom:20px">
+        </p>
+        <div id="qrCodeDiv"
+             style="display:flex;
+             justify-content:center;
+             margin-bottom:20px">
+        </div>
+        <p style="font-size:12px;
+            color:#888;
+            margin-bottom:15px">
+            Scan this QR code to get
+            the account number
+        </p>
+        <button onclick="closeQR()"
+                style="width:100%;
+                padding:12px;
+                background:#1a237e;
+                color:white;border:none;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:14px;
+                font-weight:600">
+            Close
+        </button>
+    </div>
+</div>
+
+<!-- Chatbot -->
+<div id="chatbot" style="position:fixed;
+    bottom:20px;right:20px;z-index:9998">
+
+    <!-- Chat Button -->
+    <button id="chatBtn"
+            onclick="toggleChat()"
+            style="width:60px;height:60px;
+            border-radius:50%;
+            background:linear-gradient(
+                135deg,#1a237e,#1565c0);
+            color:white;border:none;
+            font-size:28px;cursor:pointer;
+            box-shadow:0 4px 20px
+                rgba(26,35,126,0.4);
+            transition:transform 0.2s">
+        💬
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chatWindow" style="display:none;
+        position:absolute;bottom:70px;right:0;
+        width:320px;height:420px;
+        background:white;
+        border-radius:16px;
+        box-shadow:0 10px 40px rgba(0,0,0,0.2);
+        overflow:hidden;
+        flex-direction:column">
+
+        <!-- Chat Header -->
+        <div style="background:linear-gradient(
+                135deg,#1a237e,#1565c0);
+            padding:15px;color:white">
+            <div style="display:flex;
+                align-items:center;gap:10px">
+                <div style="width:40px;height:40px;
+                    border-radius:50%;
+                    background:rgba(255,255,255,0.2);
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:20px">
+                    🤖
+                </div>
+                <div>
+                    <div style="font-weight:700;
+                        font-size:15px">
+                        SecureBot
+                    </div>
+                    <div style="font-size:11px;
+                        opacity:0.8">
+                        ● Online | Banking Assistant
+                    </div>
+                </div>
+                <button onclick="toggleChat()"
+                        style="margin-left:auto;
+                        background:none;
+                        border:none;color:white;
+                        font-size:20px;
+                        cursor:pointer">✕</button>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chatMessages"
+             style="flex:1;padding:15px;
+             overflow-y:auto;
+             height:280px;
+             background:#f8f9ff">
+        </div>
+
+        <!-- Quick Replies -->
+        <div id="quickReplies"
+             style="padding:8px;
+             display:flex;flex-wrap:wrap;
+             gap:5px;border-top:1px solid #f0f0f0">
+        </div>
+
+        <!-- Chat Input -->
+        <div style="padding:10px;
+            border-top:1px solid #f0f0f0;
+            display:flex;gap:8px">
+            <input type="text"
+                   id="chatInput"
+                   placeholder="Type a message..."
+                   style="flex:1;padding:8px 12px;
+                   border:2px solid #e0e0e0;
+                   border-radius:20px;
+                   font-size:13px;outline:none"
+                   onkeypress="handleChatKey(event)">
+            <button onclick="sendMessage()"
+                    style="padding:8px 14px;
+                    background:#1a237e;
+                    color:white;border:none;
+                    border-radius:20px;
+                    cursor:pointer;
+                    font-size:16px">
+                ➤
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== CHATBOT =====
+let chatOpen = false;
+let chatInitialized = false;
+
+function toggleChat() {
+    chatOpen = !chatOpen;
+    const win =
+        document.getElementById('chatWindow');
+    win.style.display =
+        chatOpen ? 'flex' : 'none';
+    win.style.flexDirection = 'column';
+
+    if (chatOpen && !chatInitialized) {
+        chatInitialized = true;
+        setTimeout(() => {
+            addBotMessage(
+                "👋 Hello " + fullName +
+                "! I'm SecureBot, your " +
+                "banking assistant!");
+            setTimeout(() => {
+                addBotMessage(
+                    "How can I help you today?");
+                showQuickReplies([
+                    "💰 Check Balance",
+                    "🔄 How to Transfer",
+                    "🏠 Apply for Loan",
+                    "📋 Transactions",
+                    "👤 My Profile",
+                    "📄 Download Statement",
+                    "🔐 Change Password",
+                    "📞 Contact Support"
+                ]);
+            }, 800);
+        }, 300);
+    }
+}
+
+function addBotMessage(text) {
+    const div = document.createElement('div');
+    div.style.cssText =
+        'display:flex;gap:8px;margin-bottom:12px;' +
+        'align-items:flex-start';
+    div.innerHTML = `
+        <div style="width:30px;height:30px;
+            border-radius:50%;
+            background:#e8eaf6;
+            display:flex;align-items:center;
+            justify-content:center;
+            font-size:14px;flex-shrink:0">
+            🤖
+        </div>
+        <div style="background:white;
+            padding:10px 14px;
+            border-radius:0 12px 12px 12px;
+            font-size:13px;color:#333;
+            max-width:220px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.08);
+            line-height:1.5">
+            ${text}
+        </div>`;
+    const msgs =
+        document.getElementById('chatMessages');
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.style.cssText =
+        'display:flex;justify-content:flex-end;' +
+        'margin-bottom:12px';
+    div.innerHTML = `
+        <div style="background:linear-gradient(
+                135deg,#1a237e,#1565c0);
+            color:white;padding:10px 14px;
+            border-radius:12px 0 12px 12px;
+            font-size:13px;max-width:220px;
+            line-height:1.5">
+            ${text}
+        </div>`;
+    const msgs =
+        document.getElementById('chatMessages');
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showQuickReplies(options) {
+    const qr =
+        document.getElementById('quickReplies');
+    qr.innerHTML = '';
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.style.cssText =
+            'padding:5px 10px;' +
+            'background:#e8eaf6;color:#1a237e;' +
+            'border:none;border-radius:15px;' +
+            'font-size:11px;cursor:pointer;' +
+            'font-weight:600';
+        btn.onclick = () => handleQuickReply(opt);
+        qr.appendChild(btn);
+    });
+}
+
+function handleQuickReply(reply) {
+    addUserMessage(reply);
+    document.getElementById('quickReplies')
+        .innerHTML = '';
+
+    setTimeout(() => {
+        processMessage(reply);
+    }, 500);
+}
+
+function handleChatKey(e) {
+    if (e.key === 'Enter') sendMessage();
+}
+
+function sendMessage() {
+    const input =
+        document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    addUserMessage(text);
+    document.getElementById('quickReplies')
+        .innerHTML = '';
+    setTimeout(() => processMessage(text), 500);
+}
+
+function processMessage(text) {
+    const msg = text.toLowerCase();
+
+    // Balance
+    if (msg.includes('balance') ||
+        msg.includes('check')) {
+        addBotMessage(
+            "💰 To check your balance:<br>" +
+            "Click <b>Dashboard</b> in the menu<br>" +
+            "Your account balance shows there!");
+        showQuickReplies([
+            "🔄 How to Transfer",
+            "🏠 Apply Loan",
+            "📋 Transactions"
+        ]);
+    }
+    // Transfer
+    else if (msg.includes('transfer') ||
+             msg.includes('send money')) {
+        addBotMessage(
+            "🔄 To transfer money:<br>" +
+            "1. Click <b>Transfer</b> in menu<br>" +
+            "2. Select your account<br>" +
+            "3. Enter recipient account<br>" +
+            "4. Enter amount<br>" +
+            "5. Click Transfer Now!");
+        showQuickReplies([
+            "💰 Check Balance",
+            "🏠 Apply Loan",
+            "📞 Support"
+        ]);
+    }
+    // Loan
+    else if (msg.includes('loan') ||
+             msg.includes('borrow')) {
+        addBotMessage(
+            "🏠 To apply for a loan:<br>" +
+            "1. Click <b>Loans</b> in menu<br>" +
+            "2. Select loan type<br>" +
+            "3. Enter amount & tenure<br>" +
+            "4. Check EMI calculator<br>" +
+            "5. Click Apply Now!");
+        showQuickReplies([
+            "💰 Check Balance",
+            "🔄 Transfer Money",
+            "📞 Support"
+        ]);
+    }
+    // Transactions
+    else if (msg.includes('transaction') ||
+             msg.includes('history')) {
+        addBotMessage(
+            "📋 To view transactions:<br>" +
+            "Click <b>Transactions</b> in menu<br>" +
+            "You can also download PDF statement!");
+        showQuickReplies([
+            "📄 Download Statement",
+            "💰 Check Balance",
+            "🔄 Transfer"
+        ]);
+    }
+    // Statement
+    else if (msg.includes('statement') ||
+             msg.includes('download') ||
+             msg.includes('pdf')) {
+        addBotMessage(
+            "📄 To download statement:<br>" +
+            "1. Click <b>Transactions</b><br>" +
+            "2. Click <b>Download PDF Statement</b><br>" +
+            "Your statement will download!");
+        showQuickReplies([
+            "📋 View Transactions",
+            "💰 Check Balance",
+            "📞 Support"
+        ]);
+    }
+    // Profile
+    else if (msg.includes('profile') ||
+             msg.includes('account details')) {
+        addBotMessage(
+            "👤 To view/edit profile:<br>" +
+            "1. Click <b>My Profile</b> in menu<br>" +
+            "2. Edit name, phone, address<br>" +
+            "3. Upload profile photo<br>" +
+            "4. Change password");
+        showQuickReplies([
+            "🔐 Change Password",
+            "💰 Check Balance",
+            "📞 Support"
+        ]);
+    }
+    // Password
+    else if (msg.includes('password') ||
+             msg.includes('change password')) {
+        addBotMessage(
+            "🔐 To change password:<br>" +
+            "1. Click <b>My Profile</b><br>" +
+            "2. Scroll to Change Password<br>" +
+            "3. Enter current password<br>" +
+            "4. Enter new password<br>" +
+            "5. Click Change Password!");
+        showQuickReplies([
+            "👤 My Profile",
+            "📞 Support",
+            "💰 Balance"
+        ]);
+    }
+    // QR Code
+    else if (msg.includes('qr') ||
+             msg.includes('qr code')) {
+        addBotMessage(
+            "📱 To get QR Code:<br>" +
+            "1. Go to <b>Dashboard</b><br>" +
+            "2. See My Accounts section<br>" +
+            "3. Click <b>QR Code</b> button<br>" +
+            "Share this to receive money!");
+        showQuickReplies([
+            "💰 Balance",
+            "🔄 Transfer",
+            "📞 Support"
+        ]);
+    }
+    // Support
+    else if (msg.includes('support') ||
+             msg.includes('help') ||
+             msg.includes('contact')) {
+        addBotMessage(
+            "📞 Contact SecureBank Support:<br>" +
+            "📧 Email: support@securebank.com<br>" +
+            "📱 Phone: 1800-XXX-XXXX<br>" +
+            "🕐 Hours: Mon-Sat 9AM-6PM<br><br>" +
+            "We are here to help you!");
+        showQuickReplies([
+            "💰 Balance",
+            "🔄 Transfer",
+            "🏠 Loan"
+        ]);
+    }
+    // Deposit
+    else if (msg.includes('deposit')) {
+        addBotMessage(
+            "💰 To deposit money:<br>" +
+            "1. Click <b>Deposit</b> in menu<br>" +
+            "2. Select your account<br>" +
+            "3. Enter amount<br>" +
+            "4. Click Deposit Now!");
+        showQuickReplies([
+            "💸 Withdraw",
+            "🔄 Transfer",
+            "📋 Transactions"
+        ]);
+    }
+    // Withdraw
+    else if (msg.includes('withdraw')) {
+        addBotMessage(
+            "💸 To withdraw money:<br>" +
+            "1. Click <b>Withdraw</b> in menu<br>" +
+            "2. Select your account<br>" +
+            "3. Enter amount<br>" +
+            "4. Click Withdraw Now!");
+        showQuickReplies([
+            "💰 Deposit",
+            "🔄 Transfer",
+            "📋 Transactions"
+        ]);
+    }
+    // Greeting
+    else if (msg.includes('hi') ||
+             msg.includes('hello') ||
+             msg.includes('hey')) {
+        addBotMessage(
+            "👋 Hello " + fullName + "!<br>" +
+            "How can I help you today?");
+        showQuickReplies([
+            "💰 Check Balance",
+            "🔄 How to Transfer",
+            "🏠 Apply Loan",
+            "📞 Contact Support"
+        ]);
+    }
+    // Thanks
+    else if (msg.includes('thank') ||
+             msg.includes('thanks')) {
+        addBotMessage(
+            "😊 You're welcome " +
+            fullName + "!<br>" +
+            "Happy to help anytime!<br>" +
+            "Is there anything else?");
+        showQuickReplies([
+            "💰 Balance",
+            "🔄 Transfer",
+            "📞 Support"
+        ]);
+    }
+    // Default
+    else {
+        addBotMessage(
+            "🤔 I'm not sure about that.<br>" +
+            "Please choose from these options:");
+        showQuickReplies([
+            "💰 Check Balance",
+            "🔄 How to Transfer",
+            "🏠 Apply for Loan",
+            "📋 Transactions",
+            "📄 Download Statement",
+            "📞 Contact Support"
+        ]);
+    }
+}
+</script>
+
+</body>
+</html>
+            
